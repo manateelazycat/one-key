@@ -5,15 +5,15 @@
 ;; Author: Andy Stewart <lazycat.manatee@gmail.com>
 ;;         rubikitch <rubikitch@ruby-lang.org>
 ;; Maintainer: Andy Stewart <lazycat.manatee@gmail.com>
-;; Copyright (C) 2008, 2009, Andy Stewart, all rights reserved.
+;; Copyright (C) 2008 ~ 2021, Andy Stewart, all rights reserved.
 ;; Copyright (C) 2009, rubikitch, all rights reserved.
 ;; Created: 2008-12-22 21:54:30
-;; Version: 0.7.0
-;; Last-Updated: 2009-05-23 00:52:06
+;; Version: 0.8.0
+;; Last-Updated: 2021-05-28 22:41:14
 ;;           By: Andy Stewart
 ;; URL: http://www.emacswiki.org/emacs/download/one-key.el
 ;; Keywords: one-key
-;; Compatibility: GNU Emacs 22 ~ 23
+;; Compatibility: GNU Emacs 22 ~ 28
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -75,27 +75,19 @@
 ;;
 ;; Example:
 ;;
-;; (defvar example-menu-alist
-;;      '(
-;;        (("Keystroke-A" . "Describe-A") . Command-A)
-;;        (("Keystroke-B" . "Describe-B") . Command-B)
-;;        (("Keystroke-C" . "Describe-C") . Command-C)
-;;        ))
+;; Define one-key function `one-key-menu-foo'
 ;;
-;; Make sure COMMAND is `interactive', otherwise will
-;; throw error.
+;; (one-key-create-menu
+;;  "FOO"
+;;  '(
+;;    (("Keystroke-A" . "Describe-A") . Command-A)
+;;    (("Keystroke-B" . "Describe-B") . Command-B)
+;;    (("Keystroke-C" . "Describe-C") . Command-C))
+;;  t)
 ;;
-;; ** The format of menu function:
+;; Then call `one-key-menu-foo' for test.
 ;;
-;; (one-key-menu "MENU-NAME" MENU-ALIST)
-;;
-;; Example:
-;;
-;; (defun example-menu ()
-;;   (interactive)
-;;   (one-key-menu "example" example-menu-alist)
-;;
-;; ** The argument of function `one-key-menu':
+;; ** The argument of function `one-key-create-menu':
 ;;
 ;; `title' is the title of menu, any string you like.
 ;; `info-alist' is a special list that contain KEY, DESCRIBE
@@ -109,51 +101,6 @@
 ;; `alternate-function' is alternate function execute at last.
 ;; `execute-last-command-when-miss-match' whether execute last input command
 ;; when keystroke is miss match.
-;;
-;; Tips:
-;;
-;; You can use `one-key-insert-template' insert template code for special keymap.
-;; Example, after you run `one-key-insert-template', you will got Keymap prompt:
-;; "Keymap to One-Key: ", you type "C-x r", you will got Title prompt:
-;; "Title: ", input any name you like.
-;; Then will generate template code like below:
-;;
-;; (defvar one-key-menu-bookmark-alist nil
-;;   "The `one-key' menu list for BOOKMARK.")
-;;
-;; (setq one-key-menu-bookmark-alist
-;;    '(
-;;      (("C-@" . "point-to-register") . point-to-register)
-;;      (("SPC" . "point-to-register") . point-to-register)
-;;      (("+" . "increment-register") . increment-register)
-;;      (("b" . "bookmark-jump") . bookmark-jump)
-;;      (("c" . "clear-rectangle") . clear-rectangle)
-;;      (("d" . "delete-rectangle") . delete-rectangle)
-;;      (("f" . "frame-configuration-to-register") . frame-configuration-to-register)
-;;      (("g" . "insert-register") . insert-register)
-;;      (("i" . "insert-register") . insert-register)
-;;      (("j" . "jump-to-register") . jump-to-register)
-;;      (("k" . "kill-rectangle") . kill-rectangle)
-;;      (("l" . "bookmark-bmenu-list") . bookmark-bmenu-list)
-;;      (("m" . "bookmark-set") . bookmark-set)
-;;      (("n" . "number-to-register") . number-to-register)
-;;      (("o" . "open-rectangle") . open-rectangle)
-;;      (("r" . "copy-rectangle-to-register") . copy-rectangle-to-register)
-;;      (("s" . "copy-to-register") . copy-to-register)
-;;      (("t" . "string-rectangle") . string-rectangle)
-;;      (("w" . "window-configuration-to-register") . window-configuration-to-register)
-;;      (("x" . "copy-to-register") . copy-to-register)
-;;      (("y" . "yank-rectangle") . yank-rectangle)
-;;      (("C-SPC" . "point-to-register") . point-to-register)
-;;      ))
-;;
-;; (defun one-key-menu-bookmark ()
-;;   (interactive)
-;;   (one-key-menu "BOOKMARK" one-key-menu-bookmark-alist))
-;;
-;; Alike you can use command `one-key-show-template', it similar with
-;; `one-key-insert-template', it show template code in buffer
-;; "One-Key-Template" instead insert.
 ;;
 
 ;;; Installation:
@@ -725,6 +672,28 @@ TITLE is title name that any string you like."
       ;; Result.
       (buffer-string)
       )))
+
+(cl-defmacro one-key-create-menu (title
+                                  info-alist
+                                  &optional
+                                  miss-match-exit-p
+                                  recursion-p
+                                  protect-function
+                                  alternate-function
+                                  execute-last-command-when-miss-match)
+  (let* ((one-key-function (intern (format "one-key-menu-%s" (downcase title)))))
+    `(progn
+       (defun ,one-key-function()
+         (interactive)
+         (one-key-menu
+          ,title
+          ,info-alist
+          ,miss-match-exit-p
+          ,recursion-p
+          ,protect-function
+          ,alternate-function
+          ,execute-last-command-when-miss-match)
+         ))))
 
 (provide 'one-key)
 
