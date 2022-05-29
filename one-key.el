@@ -237,7 +237,7 @@
   "One key."
   :group 'editing)
 
-(defcustom one-key-popup-window t
+(defcustom one-key-popup-window nil
   "Whether popup window when first time run `one-key-menu'."
   :type 'boolean
   :group 'one-key)
