@@ -411,6 +411,7 @@ last command when it miss match in key alist."
           (cond
            ;; Match user keystrokes.
            ((catch 'match
+              (when (stringp key) (setq key (read-kbd-macro key)))
               (cl-loop for ((k . desc) . command) in info-alist do
                        ;; Get match key.
                        (setq match-key k)
